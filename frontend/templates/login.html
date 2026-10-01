@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PolicyPilot — Sign In</title>
+  <meta name="description" content="Sign in to PolicyPilot, Physics Wallah's evidence-grounded enterprise policy assistant.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/main.css">
+</head>
+<body class="auth-body">
+  <div class="auth-bg">
+    <div class="auth-grid"></div>
+  </div>
+
+  <div class="auth-container">
+    <div class="auth-card">
+      <!-- Logo -->
+      <div class="auth-logo">
+        <div class="logo-icon">
+          <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="32" height="32" rx="8" fill="url(#logoGrad)"/>
+            <path d="M8 10h10a4 4 0 010 8H8V10z" fill="white" opacity="0.9"/>
+            <path d="M8 18h6v6H8v-6z" fill="white" opacity="0.6"/>
+            <circle cx="22" cy="22" r="4" fill="white" opacity="0.8"/>
+            <defs>
+              <linearGradient id="logoGrad" x1="0" y1="0" x2="32" y2="32">
+                <stop offset="0%" stop-color="#6366f1"/>
+                <stop offset="100%" stop-color="#8b5cf6"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div>
+          <h1 class="logo-name">PolicyPilot</h1>
+          <p class="logo-tagline">Physics Wallah</p>
+        </div>
+      </div>
+
+      <h2 class="auth-title">Welcome back</h2>
+      <p class="auth-subtitle">Sign in to access your policy assistant</p>
+
+      <div id="auth-error" class="alert alert-error" style="display:none;"></div>
+
+      <form id="login-form" class="auth-form">
+        <div class="form-group">
+          <label class="form-label" for="email">Work Email</label>
+          <input type="email" id="email" name="email" class="form-input"
+            placeholder="you@pw.live" required autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="password">Password</label>
+          <div class="input-wrapper">
+            <input type="password" id="password" name="password" class="form-input"
+              placeholder="••••••••" required autocomplete="current-password">
+            <button type="button" class="input-toggle" id="toggle-pass" aria-label="Toggle password">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full" id="login-btn">
+          <span class="btn-text">Sign In</span>
+          <span class="btn-spinner" style="display:none;">
+            <svg class="spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <circle cx="12" cy="12" r="10" stroke-width="2" opacity="0.3"/>
+              <path d="M12 2a10 10 0 0110 10" stroke-width="2"/>
+            </svg>
+          </span>
+        </button>
+      </form>
+
+      <div class="auth-divider"><span>Demo accounts</span></div>
+      <div class="demo-accounts">
+        <button class="demo-btn" data-email="admin@physicswallah.com" data-pass="Admin@123!Change_This" data-role="admin">
+          <span class="demo-role admin">Admin</span>
+          <span>admin@physicswallah.com</span>
+        </button>
+        <button class="demo-btn" data-email="meera.nair@pw.live" data-pass="Demo@123!" data-role="hr">
+          <span class="demo-role hr">HR</span>
+          <span>meera.nair@pw.live</span>
+        </button>
+        <button class="demo-btn" data-email="priya.sharma@pw.live" data-pass="Demo@123!" data-role="employee">
+          <span class="demo-role employee">Employee</span>
+          <span>priya.sharma@pw.live</span>
+        </button>
+      </div>
+    </div>
+
+    <p class="auth-footer">
+      Evidence-grounded AI · Never invents company policy
+    </p>
+  </div>
+
+  <script>
+    const API = '';
+
+    // Toggle password visibility
+    document.getElementById('toggle-pass').addEventListener('click', function() {
+      const inp = document.getElementById('password');
+      inp.type = inp.type === 'password' ? 'text' : 'password';
+    });
+
+    // Demo account quick-fill
+    document.querySelectorAll('.demo-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.getElementById('email').value = this.dataset.email;
+        document.getElementById('password').value = this.dataset.pass;
+      });
+    });
+
+    // Login form
+    document.getElementById('login-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const btn = document.getElementById('login-btn');
+      const errorEl = document.getElementById('auth-error');
+
+      btn.querySelector('.btn-text').style.display = 'none';
+      btn.querySelector('.btn-spinner').style.display = 'inline-flex';
+      btn.disabled = true;
+      errorEl.style.display = 'none';
+
+      try {
+        const res = await fetch('/auth/login', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            email: document.getElementById('email').value,
+            password: document.getElementById('password').value,
+          }),
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || 'Login failed');
+        }
+
+        localStorage.setItem('pp_token', data.access_token);
+        localStorage.setItem('pp_user', JSON.stringify(data.user));
+        window.location.href = '/chat';
+
+      } catch (err) {
+        errorEl.textContent = err.message;
+        errorEl.style.display = 'block';
+      } finally {
+        btn.querySelector('.btn-text').style.display = 'inline';
+        btn.querySelector('.btn-spinner').style.display = 'none';
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

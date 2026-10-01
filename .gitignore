@@ -1,0 +1,69 @@
+# =============================================================
+# .gitignore — PolicyPilot
+# =============================================================
+
+# Environment
+.env
+.env.local
+.env.production
+
+# Policy documents (NEVER commit internal company documents)
+documents/raw/
+documents/processed/
+documents/rejected/
+PW POLICY/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.mypy_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+.ruff_cache/
+
+# Virtual environments
+venv/
+env/
+.venv/
+ENV/
+
+# IDE
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# ChromaDB data
+chroma_data/
+chromadb/
+
+# Logs
+logs/
+*.log
+
+# Database dumps
+*.sql.gz
+*.dump
+
+# Docker
+docker-compose.override.yml
+
+# Test artifacts
+tests/__pycache__/
+.pytest_cache/
+
+# Secrets
+*.pem
+*.key
+*.cert

@@ -1,0 +1,80 @@
+version: "3.9"
+
+services:
+  # ── Frontend / Backend (Flask) ───────────────────────────────
+  backend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+    container_name: policypilot_backend
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=${FLASK_ENV:-production}
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      - CHROMA_HOST=chromadb
+      - CHROMA_PORT=8000
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GEMINI_MODEL=${GEMINI_MODEL:-gemini-1.5-flash}
+      - GEMINI_EMBEDDING_MODEL=${GEMINI_EMBEDDING_MODEL:-models/text-embedding-004}
+      - JWT_SECRET=${JWT_SECRET}
+      - FLASK_SECRET_KEY=${FLASK_SECRET_KEY}
+      - LANGSMITH_API_KEY=${LANGSMITH_API_KEY:-}
+      - LANGSMITH_PROJECT=${LANGSMITH_PROJECT:-policypilot}
+      - LANGSMITH_TRACING=${LANGSMITH_TRACING:-false}
+    volumes:
+      - ./documents:/app/documents
+      - ./backend:/app/backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+      chromadb:
+        condition: service_started
+    networks:
+      - policypilot_net
+    restart: unless-stopped
+
+  # ── PostgreSQL ────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: policypilot_postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-policypilot}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-policypilot}
+      POSTGRES_DB: ${POSTGRES_DB:-policypilot}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-policypilot}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - policypilot_net
+    restart: unless-stopped
+
+  # ── ChromaDB ──────────────────────────────────────────────────
+  chromadb:
+    image: chromadb/chroma:0.5.18
+    container_name: policypilot_chromadb
+    ports:
+      - "8001:8000"
+    volumes:
+      - chroma_data:/chroma/chroma
+    environment:
+      - IS_PERSISTENT=TRUE
+      - ANONYMIZED_TELEMETRY=False
+    networks:
+      - policypilot_net
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  chroma_data:
+
+networks:
+  policypilot_net:
+    driver: bridge

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PolicyPilot — Admin Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/main.css">
+  <link rel="stylesheet" href="/static/css/admin.css">
+</head>
+<body class="app-body">
+  <!-- Sidebar (reuse structure) -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <div class="logo-icon-sm">
+          <svg viewBox="0 0 24 24" fill="none"><rect width="24" height="24" rx="6" fill="url(#sg2)"/><path d="M5 7h8a3 3 0 010 6H5V7z" fill="white" opacity="0.9"/><path d="M5 13h4v5H5v-5z" fill="white" opacity="0.6"/><circle cx="17" cy="17" r="3" fill="white" opacity="0.8"/><defs><linearGradient id="sg2" x1="0" y1="0" x2="24" y2="24"><stop offset="0%" stop-color="#6366f1"/><stop offset="100%" stop-color="#8b5cf6"/></linearGradient></defs></svg>
+        </div>
+        <span class="logo-text">PolicyPilot</span>
+      </div>
+    </div>
+    <nav class="admin-nav">
+      <a href="/chat" class="admin-nav-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Chat</a>
+      <a href="#analytics" class="admin-nav-item active"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Analytics</a>
+      <a href="#documents" class="admin-nav-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>Documents</a>
+      <a href="#audit" class="admin-nav-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>Audit Logs</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar" id="user-avatar">A</div>
+        <div class="user-details">
+          <span class="user-name" id="user-name">Admin</span>
+          <span class="user-role-badge admin">admin</span>
+        </div>
+      </div>
+      <div class="sidebar-actions">
+        <button class="sidebar-action-btn" id="theme-toggle" title="Toggle theme">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        </button>
+        <button class="sidebar-action-btn logout-btn" id="logout-btn" title="Sign out">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="admin-main">
+    <header class="admin-header">
+      <h1 class="admin-page-title">Admin Dashboard</h1>
+      <p class="admin-page-subtitle">Manage policies, monitor usage, review audit logs</p>
+    </header>
+
+    <!-- Metrics cards -->
+    <section id="analytics" class="admin-section">
+      <h2 class="section-title">Platform Analytics</h2>
+      <div class="metrics-grid" id="metrics-grid">
+        <div class="metric-card skeleton"><div class="skeleton-line"></div></div>
+        <div class="metric-card skeleton"><div class="skeleton-line"></div></div>
+        <div class="metric-card skeleton"><div class="skeleton-line"></div></div>
+        <div class="metric-card skeleton"><div class="skeleton-line"></div></div>
+        <div class="metric-card skeleton"><div class="skeleton-line"></div></div>
+        <div class="metric-card skeleton"><div class="skeleton-line"></div></div>
+      </div>
+    </section>
+
+    <!-- Document Management -->
+    <section id="documents" class="admin-section">
+      <div class="section-header">
+        <h2 class="section-title">Policy Documents</h2>
+        <button class="btn btn-primary btn-sm" id="upload-btn">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17,8 12,3 7,8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Upload Policy
+        </button>
+      </div>
+
+      <div class="doc-filters">
+        <select class="filter-select" id="category-filter">
+          <option value="">All Categories</option>
+          <option value="HR">HR</option>
+          <option value="Finance">Finance</option>
+          <option value="Compliance">Compliance</option>
+          <option value="IT">IT</option>
+          <option value="Benefits">Benefits</option>
+          <option value="Procurement">Procurement</option>
+          <option value="Quality">Quality</option>
+        </select>
+        <select class="filter-select" id="status-filter">
+          <option value="">All Status</option>
+          <option value="active">Active</option>
+          <option value="archived">Archived</option>
+          <option value="draft">Draft</option>
+        </select>
+      </div>
+
+      <div class="docs-table-wrapper">
+        <table class="docs-table" id="docs-table">
+          <thead>
+            <tr>
+              <th>Policy Name</th>
+              <th>Category</th>
+              <th>Version</th>
+              <th>Status</th>
+              <th>Chunks</th>
+              <th>Indexed</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="docs-tbody">
+            <tr><td colspan="7" class="table-loading">Loading documents...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Audit Logs -->
+    <section id="audit" class="admin-section">
+      <div class="section-header">
+        <h2 class="section-title">Audit Logs</h2>
+        <div class="audit-filters">
+          <select class="filter-select" id="decision-filter">
+            <option value="">All Decisions</option>
+            <option value="ANSWER">Answered</option>
+            <option value="REFUSE">Refused</option>
+          </select>
+        </div>
+      </div>
+      <div class="audit-table-wrapper">
+        <table class="docs-table" id="audit-table">
+          <thead>
+            <tr><th>Time</th><th>Query</th><th>Decision</th><th>Retries</th><th>Latency</th></tr>
+          </thead>
+          <tbody id="audit-tbody">
+            <tr><td colspan="5" class="table-loading">Loading audit logs...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- Upload Modal -->
+  <div class="modal-overlay" id="upload-modal" style="display:none;">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Upload Policy Document</h3>
+        <button class="close-btn" id="close-upload-modal">✕</button>
+      </div>
+      <form id="upload-form" class="modal-form">
+        <div class="form-group">
+          <label class="form-label">Document File <span class="required">*</span></label>
+          <div class="file-drop-zone" id="file-drop-zone">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17,8 12,3 7,8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <span>Drop PDF/DOCX here or <label for="file-input" class="file-label">browse</label></span>
+            <input type="file" id="file-input" accept=".pdf,.docx" hidden>
+            <span class="file-name" id="file-name">Max 50MB</span>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Policy Name <span class="required">*</span></label>
+            <input type="text" class="form-input" id="up-name" placeholder="Leave Policy 2026" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Version</label>
+            <input type="text" class="form-input" id="up-version" placeholder="1.0">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Category</label>
+            <select class="form-input" id="up-category">
+              <option value="">Select...</option>
+              <option value="HR">HR</option>
+              <option value="Finance">Finance</option>
+              <option value="Compliance">Compliance</option>
+              <option value="IT">IT</option>
+              <option value="Benefits">Benefits</option>
+              <option value="Procurement">Procurement</option>
+              <option value="Quality">Quality</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Status</label>
+            <select class="form-input" id="up-status">
+              <option value="active">Active</option>
+              <option value="draft">Draft</option>
+              <option value="archived">Archived</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes</label>
+          <textarea class="form-input" id="up-notes" rows="2" placeholder="Optional notes about this version..."></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" id="cancel-upload">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="upload-submit-btn">
+            <span>Upload & Index</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toast-container"></div>
+  <script src="/static/js/app.js"></script>
+  <script src="/static/js/admin.js"></script>
+</body>
+</html>

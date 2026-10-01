@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PolicyPilot — AI Policy Assistant</title>
+  <meta name="description" content="Ask PolicyPilot any question about Physics Wallah's internal company policies. Evidence-grounded answers with citations.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/main.css">
+  <link rel="stylesheet" href="/static/css/chat.css">
+</head>
+<body class="app-body">
+
+<!-- ── Sidebar ──────────────────────────────────────────────── -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">
+      <div class="logo-icon-sm">
+        <svg viewBox="0 0 24 24" fill="none"><rect width="24" height="24" rx="6" fill="url(#sg)"/><path d="M5 7h8a3 3 0 010 6H5V7z" fill="white" opacity="0.9"/><path d="M5 13h4v5H5v-5z" fill="white" opacity="0.6"/><circle cx="17" cy="17" r="3" fill="white" opacity="0.8"/><defs><linearGradient id="sg" x1="0" y1="0" x2="24" y2="24"><stop offset="0%" stop-color="#6366f1"/><stop offset="100%" stop-color="#8b5cf6"/></linearGradient></defs></svg>
+      </div>
+      <span class="logo-text">PolicyPilot</span>
+    </div>
+    <button class="sidebar-collapse" id="collapse-btn" aria-label="Collapse sidebar">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+  </div>
+
+  <button class="btn btn-primary btn-new-chat" id="new-chat-btn">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+    <span>New Chat</span>
+  </button>
+
+  <div class="sidebar-search">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+    <input type="search" id="conv-search" placeholder="Search conversations..." class="search-input">
+  </div>
+
+  <div class="conversations-label">Recent</div>
+  <div class="conversations-list" id="conversations-list">
+    <div class="conv-skeleton"></div>
+    <div class="conv-skeleton"></div>
+    <div class="conv-skeleton"></div>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="user-info" id="user-info">
+      <div class="user-avatar" id="user-avatar">?</div>
+      <div class="user-details">
+        <span class="user-name" id="user-name">Loading...</span>
+        <span class="user-role-badge" id="user-role">employee</span>
+      </div>
+    </div>
+    <div class="sidebar-actions">
+      <a href="/admin" class="sidebar-action-btn" id="admin-link" style="display:none;" title="Admin Dashboard">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      </a>
+      <button class="sidebar-action-btn" id="theme-toggle" title="Toggle theme">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+      </button>
+      <button class="sidebar-action-btn logout-btn" id="logout-btn" title="Sign out">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+      </button>
+    </div>
+  </div>
+</aside>
+
+<!-- ── Main Chat Area ──────────────────────────────────────── -->
+<main class="chat-main" id="chat-main">
+  <!-- Top bar -->
+  <header class="chat-header">
+    <button class="sidebar-toggle" id="sidebar-toggle-btn" aria-label="Toggle sidebar">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <div class="chat-header-info">
+      <span class="chat-title" id="chat-title">New Conversation</span>
+      <span class="chat-subtitle">Evidence-grounded policy answers</span>
+    </div>
+    <div class="chat-header-actions">
+      <div class="status-indicator">
+        <span class="status-dot" id="status-dot"></span>
+        <span class="status-text" id="status-text">Ready</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Messages -->
+  <div class="messages-area" id="messages-area">
+    <!-- Welcome State -->
+    <div class="welcome-state" id="welcome-state">
+      <div class="welcome-icon">
+        <svg viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="16" fill="url(#wg)"/><path d="M14 20h24a8 8 0 010 16H14V20z" fill="white" opacity="0.9"/><path d="M14 36h12v12H14V36z" fill="white" opacity="0.6"/><circle cx="44" cy="44" r="8" fill="white" opacity="0.8"/><defs><linearGradient id="wg" x1="0" y1="0" x2="64" y2="64"><stop offset="0%" stop-color="#6366f1"/><stop offset="100%" stop-color="#8b5cf6"/></linearGradient></defs></svg>
+      </div>
+      <h2 class="welcome-title">PolicyPilot</h2>
+      <p class="welcome-subtitle">Ask any question about Physics Wallah's company policies. I'll find the evidence and cite the exact source.</p>
+      <div class="suggested-questions">
+        <p class="suggestions-label">Try asking:</p>
+        <div class="suggestions-grid">
+          <button class="suggestion-btn" data-q="What is the leave policy at PW?">📋 What is the leave policy at PW?</button>
+          <button class="suggestion-btn" data-q="What is the notice period for resignation?">📄 What is the notice period for resignation?</button>
+          <button class="suggestion-btn" data-q="Can employees claim internet reimbursement?">💻 Can employees claim internet reimbursement?</button>
+          <button class="suggestion-btn" data-q="What is the vibe coding policy?">🤖 What is the vibe coding policy?</button>
+          <button class="suggestion-btn" data-q="What are the travel reimbursement rules?">✈️ What are the travel reimbursement rules?</button>
+          <button class="suggestion-btn" data-q="Can I accept gifts from vendors?">🎁 Can I accept gifts from vendors?</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Source Preview Panel -->
+  <aside class="source-panel" id="source-panel">
+    <div class="source-panel-header">
+      <h3>Source Preview</h3>
+      <button class="close-panel-btn" id="close-source-panel">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="source-panel-content" id="source-panel-content"></div>
+  </aside>
+
+  <!-- Input Area -->
+  <div class="input-area">
+    <div class="input-container">
+      <textarea
+        id="query-input"
+        class="query-textarea"
+        placeholder="Ask about any PW policy... (Shift+Enter for new line)"
+        rows="1"
+        maxlength="2000"
+      ></textarea>
+      <div class="input-actions">
+        <span class="char-count" id="char-count">0/2000</span>
+        <button class="send-btn" id="send-btn" aria-label="Send message" disabled>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z"/></svg>
+        </button>
+      </div>
+    </div>
+    <p class="input-disclaimer">
+      Answers are grounded in PW policy documents only · Never invents company policy
+    </p>
+  </div>
+</main>
+
+<!-- Toast notifications -->
+<div class="toast-container" id="toast-container"></div>
+
+<script src="/static/js/app.js"></script>
+<script src="/static/js/chat.js"></script>
+</body>
+</html>

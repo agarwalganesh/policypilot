@@ -1,0 +1,43 @@
+FROM python:3.11-slim
+
+LABEL maintainer="PolicyPilot Team"
+LABEL description="PolicyPilot Backend — Evidence-Grounded Enterprise Policy Assistant"
+
+# System deps for PyMuPDF and psycopg2
+RUN apt-get update && apt-get install -y \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    libpq-dev \
+    gcc \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Install Python deps first (layer caching)
+COPY requirements.txt .
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
+COPY backend/ ./backend/
+COPY frontend/ ./frontend/
+COPY scripts/ ./scripts/
+
+# Create document dirs
+RUN mkdir -p documents/raw documents/processed documents/rejected
+
+# Non-root user for security
+RUN useradd --create-home appuser && chown -R appuser:appuser /app
+USER appuser
+
+EXPOSE 5000
+
+ENV PYTHONPATH=/app
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD curl -f http://localhost:5000/health || exit 1
+
+CMD ["python", "-m", "backend.main"]
