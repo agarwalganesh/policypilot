@@ -1,0 +1,9 @@
+documents/
+tests/
+docker/
+docker-compose.yml
+.pytest_cache/
+.deepeval/
+scripts/
+DEVELOPMENT_PLAN.md
+README.md
