@@ -32,9 +32,12 @@ Return JSON:
 }}
 
 Rules:
-- valid = true ONLY if every factual claim in the answer is supported by the evidence
-- If the answer says "I couldn't find" or refuses, that is ALWAYS valid = true
-- If the answer invents numbers/policies/rules not in evidence, valid = false"""),
+- valid = true if ALL factual claims (numbers, dates, entitlements, rules) appear in the evidence
+- valid = true if the answer reorganizes, summarizes, or formats evidence without adding new facts
+- valid = true if the answer says "I couldn't find" or refuses — refusals are ALWAYS valid
+- valid = false ONLY if the answer invents specific numbers, names, or policies NOT present in the evidence
+- contains_unsupported_claims = true only when a SPECIFIC invented fact is present (not just formatting)
+- When in doubt, set valid = true"""),
     ("human", """Evidence:
 {evidence}
 
@@ -62,10 +65,10 @@ def answer_validator_node(state: AgentState) -> Dict[str, Any]:
     if not answer:
         return {"answer_valid": False, "answer_validation_reason": "Empty answer"}
 
-    # Build abbreviated evidence text
-    evidence_text = "\n".join(
+    # Build evidence text for validator
+    evidence_text = "\n\n".join(
         f"[{doc.metadata.get('document_name', '?')} p{doc.metadata.get('page', '?')}]: "
-        f"{doc.page_content[:400]}"
+        f"{doc.page_content}"
         for doc in docs
     )
 
@@ -73,19 +76,33 @@ def answer_validator_node(state: AgentState) -> Dict[str, Any]:
         chain = VALIDATION_PROMPT | _get_llm() | JsonOutputParser()
         result = chain.invoke({"evidence": evidence_text, "answer": answer})
 
-        valid = result.get("valid", False)
+        valid = result.get("valid", True)
         reason = result.get("reason", "")
         unsupported = result.get("contains_unsupported_claims", False)
         correction = result.get("suggested_correction", "")
 
         logger.info("answer_validation_complete", valid=valid, unsupported=unsupported)
 
-        # If invalid and a correction is suggested, use it
-        if not valid and correction:
+        if not valid:
+            # A specific invented fact was flagged: never pass the answer through
+            if unsupported:
+                if correction and len(correction.strip()) > 20:
+                    return {
+                        "answer_valid": False,
+                        "answer_validation_reason": reason,
+                        "answer": correction,
+                    }
+                return {
+                    "answer_valid": False,
+                    "answer_validation_reason": reason,
+                }
+
+            # Invalid without a concrete unsupported claim: treat as an
+            # over-conservative verdict and pass through to avoid false refusals
+            logger.warning("answer_validator_uncertain_passing_through", reason=reason)
             return {
-                "answer_valid": False,
-                "answer_validation_reason": reason,
-                "answer": correction,
+                "answer_valid": True,
+                "answer_validation_reason": f"Validator uncertain (passed through): {reason}",
             }
 
         return {

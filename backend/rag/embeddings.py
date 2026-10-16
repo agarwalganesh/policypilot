@@ -1,6 +1,6 @@
 """
 PolicyPilot — Embeddings
-Wraps Google Gemini embeddings via the centralized LLM service
+Wraps local high-speed embeddings via the centralized LLM service
 with retry logic and health check.
 """
 from __future__ import annotations
@@ -11,7 +11,7 @@ from typing import List
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 from backend.config import get_logger, get_settings
-from backend.services.llm import get_embedding_model as get_gemini_embedding_model
+from backend.services.llm import get_embedding_model as get_central_embedding_model
 
 logger = get_logger(__name__)
 settings = get_settings()
@@ -22,9 +22,9 @@ def get_embedding_model():
     """Return a cached embedding model instance."""
     logger.info(
         "embedding_model_init",
-        model=settings.gemini_embedding_model,
+        model=settings.embedding_model,
     )
-    return get_gemini_embedding_model(model=settings.gemini_embedding_model)
+    return get_central_embedding_model(model=settings.embedding_model)
 
 
 @retry(

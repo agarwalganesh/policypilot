@@ -25,6 +25,7 @@ if hasattr(sys.stderr, "reconfigure"):
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from backend.config import configure_logging, get_logger, get_settings
+from backend.rag import vectorstore
 from backend.rag.ingestion import ingest_directory, ingest_document
 
 settings = get_settings()
@@ -132,6 +133,11 @@ def main():
     print(f"   Directory: {ingest_dir}")
     print(f"   Reindex: {args.reindex}")
     print("=" * 60)
+
+    if args.reindex:
+        print("🔄 Re-index requested: resetting ChromaDB collection...")
+        vectorstore.reset_collection()
+        print("✅ Collection reset complete.\n")
 
     dir_path = Path(ingest_dir)
     if not dir_path.exists():

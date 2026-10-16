@@ -56,7 +56,7 @@ def refusal_node(state: AgentState) -> Dict[str, Any]:
         )
         suggestions = POLICY_SUGGESTIONS[:5]
         for s in suggestions:
-            refusal_msg += f"• {s}\n"
+            refusal_msg += f"- {s}\n"
         refusal_msg += (
             "\nIf you believe this information should exist in our policy documents, "
             "please contact HR directly."

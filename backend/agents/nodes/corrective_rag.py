@@ -32,18 +32,24 @@ def corrective_rag_node(state: AgentState) -> Dict[str, Any]:
         attempt=retry_count,
     )
 
-    # Merge with any previously retrieved docs (deduplicate by chunk_id)
+    # Prioritize newly retrieved docs from corrective RAG, then append existing docs
     existing_docs = state.get("retrieved_documents", [])
-    existing_ids = {d.metadata.get("chunk_id") for d in existing_docs}
-    merged = list(existing_docs)
-    for doc in new_docs:
-        cid = doc.metadata.get("chunk_id")
-        if cid not in existing_ids:
+    # Docs without a chunk_id can't be deduplicated, so they are always kept
+    seen_ids = {
+        d.metadata.get("chunk_id")
+        for d in new_docs
+        if d.metadata and d.metadata.get("chunk_id")
+    }
+    merged = list(new_docs)
+    for doc in existing_docs:
+        cid = doc.metadata.get("chunk_id") if doc.metadata else None
+        if cid is None or cid not in seen_ids:
             merged.append(doc)
-            existing_ids.add(cid)
+            if cid is not None:
+                seen_ids.add(cid)
 
     # Use combined, de-duplicated documents for next validation pass
-    combined = merged[:settings.retrieval_top_k]
+    combined = merged[: settings.retrieval_top_k]
 
     return {
         "retrieved_documents": combined,

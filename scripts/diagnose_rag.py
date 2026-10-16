@@ -74,7 +74,7 @@ def diagnose_chromadb():
 
 def diagnose_embeddings():
     print_section("2. EMBEDDINGS STATUS")
-    print(f"Configured Model: {settings.gemini_embedding_model}")
+    print(f"Configured Model: {settings.embedding_model}")
     try:
         model = get_embedding_model()
         test_vec = model.embed_query("PolicyPilot test query")

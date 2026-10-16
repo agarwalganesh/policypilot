@@ -33,7 +33,9 @@ def get_chroma_client():
         return client
     except Exception as exc:
         import os
-        chroma_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "chroma_db")
+        chroma_dir = settings.chroma_persist_dir or os.path.join(
+            os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "chroma_db"
+        )
         os.makedirs(chroma_dir, exist_ok=True)
         logger.warning(f"ChromaDB HTTP connection failed ({exc}). Using local PersistentClient at {chroma_dir}")
         return chromadb.PersistentClient(path=chroma_dir, settings=ChromaSettings(anonymized_telemetry=False))
@@ -114,9 +116,26 @@ def similarity_search_with_scores(
 def delete_by_source_file(source_file: str) -> None:
     """Delete all chunks belonging to a specific source file (for re-indexing)."""
     client = get_chroma_client()
-    collection = client.get_collection(settings.chroma_collection)
-    collection.delete(where={"source_file": {"$eq": source_file}})
-    logger.info("chunks_deleted", source_file=source_file)
+    try:
+        collection = client.get_collection(settings.chroma_collection)
+        collection.delete(where={"source_file": {"$eq": source_file}})
+        logger.info("chunks_deleted", source_file=source_file)
+    except Exception as exc:
+        logger.debug("delete_by_source_file_skipped", source_file=source_file, error=str(exc))
+
+
+def reset_collection() -> None:
+    """Delete and recreate the ChromaDB collection to accommodate model/dimension migrations."""
+    client = get_chroma_client()
+    try:
+        client.delete_collection(settings.chroma_collection)
+        logger.info("collection_reset_success", collection=settings.chroma_collection)
+    except Exception as exc:
+        logger.warning("collection_reset_warning", error=str(exc))
+    get_vector_store.cache_clear()
+    # Recreate fresh collection with new embedding function
+    get_vector_store()
+
 
 
 def collection_stats() -> Dict[str, Any]:

@@ -38,16 +38,34 @@ class Settings(BaseSettings):
     chroma_host: str = "localhost"
     chroma_port: int = 8001
     chroma_collection: str = "policy_documents"
+    chroma_persist_dir: Optional[str] = None  # local fallback; defaults to <project>/chroma_db
 
-    # ── Google Gemini (LLM) ───────────────────────────────────
-    gemini_api_key: Optional[str] = None
-    gemini_model: str = "gemini-3.8-flash"
-    gemini_embedding_model: str = "models/gemini-embedding-001"
+    # ── Groq (LLM) ────────────────────────────────────────────
+    groq_api_key: Optional[str] = None
+    groq_model: str = "llama-3.3-70b-versatile"
 
     # ── Embeddings ────────────────────────────────────────────
-    embedding_model: str = "models/text-embedding-004"
-    embedding_dimension: int = 768
-    embedding_dimensions: int = 768  # alias used by some modules
+    embedding_model: str = "all-MiniLM-L6-v2"
+    embedding_dimension: int = 384
+    embedding_dimensions: int = 384  # alias used by some modules
+    # "huggingface" = hosted Inference API (for Vercel), "local" = ONNX on disk.
+    # Both run all-MiniLM-L6-v2, so vectors stay compatible across providers.
+    embedding_provider: str = "local"
+    hf_api_token: Optional[str] = None
+    hf_embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2"
+
+    # ── Backwards-compatibility Aliases ───────────────────────
+    @property
+    def gemini_api_key(self) -> Optional[str]:
+        return self.groq_api_key
+
+    @property
+    def gemini_model(self) -> str:
+        return self.groq_model
+
+    @property
+    def gemini_embedding_model(self) -> str:
+        return self.embedding_model
 
     # ── RAG ───────────────────────────────────────────────────
     retrieval_top_k: int = 5

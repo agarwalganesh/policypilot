@@ -220,7 +220,7 @@ def run_agent(
         ]
         for idx, doc in enumerate(retrieved_docs[:3], 1):
             meta = doc.metadata or {}
-            preview = doc.page_content[:150].replace("\n", " ")
+            preview = doc.page_content[:150].replace("\n", " ").encode("ascii", errors="replace").decode("ascii")
             debug_log.extend([
                 f"\nRESULT {idx}:",
                 f"  document:        {meta.get('document_name', 'Unknown')}",
@@ -243,7 +243,8 @@ def run_agent(
             f"  {final_state.get('decision')}",
             "=" * 50 + "\n",
         ])
-        print("\n".join(debug_log), flush=True)
+        debug_output = "\n".join(debug_log)
+        print(debug_output.encode("ascii", errors="replace").decode("ascii"), flush=True)
 
         final_state["debug_info"] = {
             "retrieval_success": len(retrieved_docs) > 0,
