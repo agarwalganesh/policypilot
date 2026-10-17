@@ -7,7 +7,7 @@ from __future__ import annotations
 from datetime import date, datetime
 from typing import Any, Dict, List, Literal, Optional
 
-from pydantic import BaseModel, EmailStr, Field, field_validator
+from pydantic import BaseModel, EmailStr, Field, field_validator, ConfigDict
 
 
 # ─────────────────────────────────────────────────────────────
@@ -26,7 +26,6 @@ class RegisterRequest(BaseModel):
     role: Literal["employee", "manager", "hr", "admin"] = "employee"
 
     @field_validator("password")
-    @classmethod
     def password_strength(cls, v: str) -> str:
         if not any(c.isupper() for c in v):
             raise ValueError("Password must contain at least one uppercase letter")
@@ -50,7 +49,7 @@ class UserResponse(BaseModel):
     is_active: bool
     created_at: datetime
 
-    model_config = {"from_attributes": True}
+    model_config = ConfigDict(from_attributes=True)
 
 
 # ─────────────────────────────────────────────────────────────
@@ -115,7 +114,7 @@ class DocumentVersionResponse(BaseModel):
     access_roles: List[str]
     uploaded_at: datetime
 
-    model_config = {"from_attributes": True}
+    model_config = ConfigDict(from_attributes=True)
 
 
 class DocumentResponse(BaseModel):
@@ -128,7 +127,7 @@ class DocumentResponse(BaseModel):
     created_at: datetime
     versions: List[DocumentVersionResponse] = []
 
-    model_config = {"from_attributes": True}
+    model_config = ConfigDict(from_attributes=True)
 
 
 # ─────────────────────────────────────────────────────────────
@@ -142,7 +141,7 @@ class ConversationResponse(BaseModel):
     updated_at: datetime
     message_count: int = 0
 
-    model_config = {"from_attributes": True}
+    model_config = ConfigDict(from_attributes=True)
 
 
 class MessageResponse(BaseModel):
@@ -155,7 +154,7 @@ class MessageResponse(BaseModel):
     latency_ms: Optional[int]
     created_at: datetime
 
-    model_config = {"from_attributes": True}
+    model_config = ConfigDict(from_attributes=True)
 
 
 # ─────────────────────────────────────────────────────────────
@@ -200,7 +199,7 @@ class AuditLogResponse(BaseModel):
     latency_ms: Optional[int]
     created_at: datetime
 
-    model_config = {"from_attributes": True}
+    model_config = ConfigDict(from_attributes=True)
 
 
 class AnalyticsResponse(BaseModel):
